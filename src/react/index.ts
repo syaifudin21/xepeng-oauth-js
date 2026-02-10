@@ -1,6 +1,11 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { OAuthClient } from "../core/client";
-import { OAuthConfig, UserInfo, OAuthTokens } from "../core/types";
+import {
+  OAuthConfig,
+  UserInfo,
+  OAuthTokens,
+  TokenResponse,
+} from "../core/types";
 
 export function useOAuth(config: OAuthConfig) {
   const client = useMemo(() => new OAuthClient(config), [config]);
@@ -27,18 +32,23 @@ export function useOAuth(config: OAuthConfig) {
     }
   }, [client]);
 
-  const handleCallback = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await client.handleCallback(window.location.href);
-      setTokens(client.getTokens());
-    } catch (e) {
-      setError(e);
-    } finally {
+  const handleCallback = useCallback(
+    async <T = TokenResponse>(url?: string) => {
       setIsLoading(true);
-    }
-  }, [client]);
+      setError(null);
+      try {
+        const result = await client.handleCallback<T>(url);
+        setTokens(client.getTokens());
+        return result;
+      } catch (e) {
+        setError(e);
+        throw e;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [client],
+  );
 
   const logout = useCallback(async () => {
     setIsLoading(true);

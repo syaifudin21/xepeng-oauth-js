@@ -52,8 +52,20 @@ export class OAuthClient {
     return `${this.config.baseUrl}/oauth/authorize?${params.toString()}`;
   }
 
-  async handleCallback(callbackUrl: string): Promise<TokenResponse> {
-    const url = new URL(callbackUrl);
+  async handleCallback<T = TokenResponse>(callbackUrl?: string): Promise<T> {
+    const url = callbackUrl
+      ? new URL(callbackUrl)
+      : typeof window !== "undefined"
+        ? new URL(window.location.href)
+        : null;
+
+    if (!url) {
+      throw new OAuthError(
+        "No callback URL provided and window.location is undefined",
+        "missing_url",
+      );
+    }
+
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
@@ -74,21 +86,21 @@ export class OAuthClient {
 
     const storedState = this.retrieveOAuthState();
     if (!storedState || storedState.state !== state) {
-      throw new OAuthError("Invalid or expired state state", "invalid_state");
+      throw new OAuthError("PKCE state mismatch or expired", "invalid_state");
     }
 
-    const result = await this.exchangeCodeForToken(
+    const result = await this.exchangeCodeForToken<T>(
       code,
       storedState.codeVerifier,
     );
     return result;
   }
 
-  async exchangeCodeForToken(
+  async exchangeCodeForToken<T = TokenResponse>(
     code: string,
     codeVerifier: string,
-  ): Promise<TokenResponse> {
-    const response = await this.fetchToken({
+  ): Promise<T> {
+    const response = await this.fetchToken<T>({
       grant_type: "authorization_code",
       code,
       redirect_uri: this.config.redirectUri,
@@ -96,22 +108,22 @@ export class OAuthClient {
       client_secret: this.config.clientSecret,
       code_verifier: codeVerifier,
     });
-    await this.storeTokens(response);
+    await this.storeTokens(response as unknown as TokenResponse);
     return response;
   }
 
-  async refreshAccessToken(): Promise<TokenResponse> {
+  async refreshAccessToken<T = TokenResponse>(): Promise<T> {
     const tokens = this.storage.get();
     if (!tokens?.refreshToken) {
       throw new OAuthError("No refresh token available", "no_refresh_token");
     }
-    const response = await this.fetchToken({
+    const response = await this.fetchToken<T>({
       grant_type: "refresh_token",
       refresh_token: tokens.refreshToken,
       client_id: this.config.clientId,
       client_secret: this.config.clientSecret,
     });
-    await this.storeTokens(response);
+    await this.storeTokens(response as unknown as TokenResponse);
     return response;
   }
 
@@ -182,9 +194,9 @@ export class OAuthClient {
     this.clearOAuthState();
   }
 
-  private async fetchToken(
+  private async fetchToken<T = TokenResponse>(
     params: Record<string, string | undefined>,
-  ): Promise<TokenResponse> {
+  ): Promise<T> {
     const body = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined) body.append(key, value);

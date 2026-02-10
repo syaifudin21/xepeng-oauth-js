@@ -1,6 +1,11 @@
 import { ref, computed, readonly, onMounted } from "vue";
 import { OAuthClient } from "../core/client";
-import { OAuthConfig, UserInfo, OAuthTokens } from "../core/types";
+import {
+  OAuthConfig,
+  UserInfo,
+  OAuthTokens,
+  TokenResponse,
+} from "../core/types";
 
 export function useOAuth(config: OAuthConfig) {
   const client = new OAuthClient(config);
@@ -25,14 +30,16 @@ export function useOAuth(config: OAuthConfig) {
     }
   }
 
-  async function handleCallback() {
+  async function handleCallback<T = TokenResponse>(url?: string) {
     isLoading.value = true;
     error.value = null;
     try {
-      await client.handleCallback(window.location.href);
+      const result = await client.handleCallback<T>(url);
       tokens.value = client.getTokens();
+      return result;
     } catch (e) {
       error.value = e;
+      throw e;
     } finally {
       isLoading.value = false;
     }
