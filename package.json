@@ -1,0 +1,63 @@
+{
+    "name": "@xepeng/oauth-js",
+    "version": "1.0.0",
+    "description": "Xepeng OAuth JS SDK for React, Vue and more",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.mjs",
+            "types": "./dist/index.d.ts"
+        },
+        "./vue": {
+            "require": "./dist/vue/index.js",
+            "import": "./dist/vue/index.mjs",
+            "types": "./dist/vue/index.d.ts"
+        },
+        "./react": {
+            "require": "./dist/react/index.js",
+            "import": "./dist/react/index.mjs",
+            "types": "./dist/react/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "lint": "eslint src --ext .ts",
+        "typecheck": "tsc --noEmit"
+    },
+    "keywords": [
+        "oauth",
+        "xepeng",
+        "auth",
+        "react",
+        "vue",
+        "sdk"
+    ],
+    "author": "Xepeng",
+    "license": "MIT",
+    "devDependencies": {
+        "tsup": "^8.0.2",
+        "typescript": "^5.3.3",
+        "vue": "^3.4.15",
+        "react": "^18.2.0",
+        "@types/react": "^18.2.48"
+    },
+    "peerDependencies": {
+        "vue": "^3.0.0",
+        "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    },
+    "peerDependenciesMeta": {
+        "vue": {
+            "optional": true
+        },
+        "react": {
+            "optional": true
+        }
+    }
+}
