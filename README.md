@@ -1,13 +1,13 @@
-# @xepeng/oauth-js
+# xepeng-oauth-js
 
 Xepeng OAuth JS SDK for React, Vue, and Vanilla JS. This package provides a simple and secure way to implement OAuth with PKCE in your web applications.
 
 ## Installation
 
 ```bash
-npm install @xepeng/oauth-js
+npm install xepeng-oauth-js
 # or
-yarn add @xepeng/oauth-js
+yarn add xepeng-oauth-js
 ```
 
 ## Features
@@ -32,7 +32,7 @@ VITE_XEPENG_REDIRECT_URI=http://localhost:3000/callback
 ```
 
 ```typescript
-import { useOAuth } from "@xepeng/oauth-js/react";
+import { useOAuth } from "xepeng-oauth-js/react";
 
 const config = {
   clientId: import.meta.env.VITE_XEPENG_CLIENT_ID,
@@ -51,7 +51,7 @@ function App() {
 ### Vue 3 (using Vite)
 
 ```typescript
-import { useOAuth } from "@xepeng/oauth-js/vue";
+import { useOAuth } from "xepeng-oauth-js/vue";
 
 const config = {
   clientId: import.meta.env.VITE_XEPENG_CLIENT_ID,
@@ -72,7 +72,7 @@ export default {
 ### Vanilla JS
 
 ```typescript
-import { OAuthClient } from "@xepeng/oauth-js";
+import { OAuthClient } from "xepeng-oauth-js";
 
 const client = new OAuthClient({
   clientId: "your-client-id",

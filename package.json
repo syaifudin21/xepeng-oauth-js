@@ -1,5 +1,5 @@
 {
-    "name": "@xepeng/oauth-js",
+    "name": "xepeng-oauth-js",
     "version": "1.0.0",
     "description": "Xepeng OAuth JS SDK for React, Vue and more",
     "main": "./dist/index.js",
