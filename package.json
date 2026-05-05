@@ -1,6 +1,6 @@
 {
     "name": "xepeng-oauth-js",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Xepeng OAuth JS SDK for React, Vue and more",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
@@ -10,6 +10,11 @@
             "require": "./dist/index.js",
             "import": "./dist/index.mjs",
             "types": "./dist/index.d.ts"
+        },
+        "./integration": {
+            "require": "./dist/integration/index.js",
+            "import": "./dist/integration/index.mjs",
+            "types": "./dist/integration/index.d.ts"
         },
         "./vue": {
             "require": "./dist/vue/index.js",
@@ -37,20 +42,26 @@
         "auth",
         "react",
         "vue",
-        "sdk"
+        "sdk",
+        "integration",
+        "payment"
     ],
     "author": "Xepeng",
     "license": "MIT",
+    "dependencies": {
+        "axios": "^1.6.0"
+    },
     "devDependencies": {
+        "@types/node": "^25.6.0",
+        "@types/react": "^18.2.48",
+        "react": "^18.2.0",
         "tsup": "^8.0.2",
         "typescript": "^5.3.3",
-        "vue": "^3.4.15",
-        "react": "^18.2.0",
-        "@types/react": "^18.2.48"
+        "vue": "^3.4.15"
     },
     "peerDependencies": {
-        "vue": "^3.0.0",
-        "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+        "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+        "vue": "^3.0.0"
     },
     "peerDependenciesMeta": {
         "vue": {
