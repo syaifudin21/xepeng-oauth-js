@@ -1,15 +1,18 @@
-# Xepeng JS SDK
+# Xepeng JS SDK 🚀
 
-The Xepeng JS SDK is a comprehensive and secure solution for implementing **OAuth 2.0 with PKCE** and **Payment Integration** in your web applications. Designed for React, Vue, and Vanilla JS, it prioritizes Developer Experience (DX) and high security.
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](https://www.npmjs.com/package/xepeng-oauth-js)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+The Xepeng JS SDK is a powerful, type-safe library for implementing **OAuth 2.0 with PKCE** and **Payment Integration** in your applications. Optimized for React, Vue, and Node.js.
 
 ## ✨ Key Features
 
-- 🔒 **OAuth 2.0 with PKCE**: Secure implementation for browser-based applications (Public/Confidential Clients).
-- 🧬 **Smart Callback**: `handleCallback()` automatically detects URLs and exchanges codes without manual configuration.
-- 🔄 **Auto Refresh**: Automatically renews access tokens before expiration for uninterrupted sessions.
-- 💳 **Payment Integration**: Manage orders and payment links with automatic HMAC-SHA256 signature handling.
-- 🛡️ **TypeScript First**: Full type definitions and Generics support for custom responses.
-- 🌐 **Framework Ready**: Direct support with hooks for React and composables for Vue 3.
+- 🔒 **OAuth 2.0 + PKCE**: Secure authentication for SPAs (React, Vue, Svelte) and mobile apps.
+- 🧬 **Smart Callback**: `handleCallback()` automatically detects context and exchanges codes.
+- 🔄 **Auto Token Refresh**: Background token renewal for seamless user sessions.
+- 💳 **Payment Integration**: Manage orders and payment links with automatic HMAC-SHA256 signing.
+- 🛡️ **Isomorphic Design**: Separate modules for Browser (OAuth) and Node.js (Integration) to ensure maximum security and minimum bundle size.
+- ⚛️ **Framework First**: Native hooks for React and composables for Vue 3.
 
 ---
 
@@ -25,162 +28,119 @@ bun add xepeng-oauth-js
 
 ---
 
-## 🔐 OAuth 2.0 Implementation
+## 🔐 OAuth 2.0 (Browser / Frontend)
 
-### 1. Initialize OAuth Client
+Gunakan modul ini untuk login pengguna di aplikasi frontend.
 
+### 1. Inisialisasi Client
 ```typescript
 import { OAuthClient } from "xepeng-oauth-js";
 
 const oauth = new OAuthClient({
   clientId: "YOUR_CLIENT_ID",
-  clientSecret: "YOUR_CLIENT_SECRET", // Optional for Public Clients
-  baseUrl: "https://staging-app.xepeng.com",
+  baseUrl: "https://staging-app.xepeng.com", // Opsional
   redirectUri: "http://localhost:5173/auth/callback",
-  storage: "localStorage", // 'localStorage', 'sessionStorage', or 'memory'
+  storage: "localStorage", // 'localStorage', 'sessionStorage', atau 'memory'
 });
 ```
 
-### 2. Start Login Flow
-
+### 2. Alur Login & Callback
 ```typescript
+// Langkah 1: Redirect ke halaman login
 const login = async () => {
   const url = await oauth.getAuthorizationUrl();
   window.location.href = url;
 };
-```
 
-### 3. Handle Callback (New DX!)
-
-The SDK automatically extracts `code` and `state` from the URL.
-
-```typescript
-// On your redirect page (e.g., /auth/callback)
+// Langkah 2: Tangani callback (di halaman redirect)
 const handleAuth = async () => {
   try {
     const response = await oauth.handleCallback();
-    console.log("Login Successful!", response);
+    console.log("Login Berhasil!", response);
   } catch (error) {
-    console.error("Auth Failed:", error.message);
+    console.error("Gagal Login:", error.message);
   }
 };
 ```
 
 ---
 
-## 💳 Payment Integration
+## 💳 Payment Integration (Server-Side / Node.js)
 
-### 1. Initialize Integration Client
+Gunakan modul ini di backend atau SvelteKit/Next.js server-side. Modul ini terpisah untuk menjaga keamanan `clientSecret`.
 
+### 1. Inisialisasi Integration Client
 ```typescript
 import { XepengIntegrationClient } from "xepeng-oauth-js/integration";
 
 const client = new XepengIntegrationClient({
   clientId: "YOUR_CLIENT_ID",
-  clientSecret: "YOUR_CLIENT_SECRET",
+  clientSecret: "YOUR_CLIENT_SECRET", // WAJIB di server-side
   isProduction: false,
 });
 ```
 
-### 2. Create an Order
-
+### 2. Manajemen Order & Pembayaran
 ```typescript
-const items = [
+// Membuat Order
+const orderResponse = await client.orders().create([
   {
     amount: 50000,
-    notes: "Purchase Shirt",
-    product_description: "Flannel Shirt Size L",
-    product_name: "Flannel Shirt",
-  },
-];
+    product_name: "Kemeja Flanel",
+    product_description: "Size L, Merah",
+  }
+]);
 
-const orderResponse = await client.orders().create(items);
-const orderUid = orderResponse.data.uid;
-```
+// Membuat Link Pembayaran
+const payment = await client.paymentLinks().generate(orderResponse.data.uid, {
+  success_url: "https://toko.com/success",
+  callback_url: "https://api.toko.com/v1/callback"
+});
 
-### 3. Generate Payment Link
-
-```typescript
-const options = {
-  expired_at: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours
-  callback_url: "https://yourwebsite.com/api/notification",
-  success_url: "https://yourwebsite.com/payment/success",
-  cancel_url: "https://yourwebsite.com/payment/cancel",
-};
-
-const paymentResponse = await client.paymentLinks().generate(orderUid, options);
-window.location.href = paymentResponse.data.payment_url;
+console.log("URL Pembayaran:", payment.data.payment_url);
 ```
 
 ---
 
-## ⚛️ Framework Usage
+## ⚛️ Framework Support
 
 ### React
-
 ```tsx
 import { useOAuth } from "xepeng-oauth-js/react";
 
-function LoginButton() {
-  const { login, isAuthenticated, user } = useOAuth(config);
-
-  return (
-    <button onClick={login}>
-      {isAuthenticated ? `Welcome, ${user.name}` : "Login with Xepeng"}
-    </button>
-  );
+function App() {
+  const { login, user, isAuthenticated } = useOAuth(config);
+  return <button onClick={login}>{isAuthenticated ? user.name : "Login"}</button>;
 }
 ```
 
 ### Vue 3
-
 ```vue
 <script setup>
 import { useOAuth } from "xepeng-oauth-js/vue";
-
 const { login, user, isAuthenticated } = useOAuth(config);
 </script>
 
 <template>
-  <button @click="login">
-    {{ isAuthenticated ? `Hello ${user.name}` : 'Connect Xepeng Account' }}
-  </button>
+  <button @click="login">{{ isAuthenticated ? user.name : 'Connect Xepeng' }}</button>
 </template>
 ```
 
 ---
 
-## ⚙️ Configuration Options
+## 🛡️ Keamanan & Bundle Size
 
-### OAuth Client Options
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `clientId` | `string` | **Required** | Your application Client ID. |
-| `clientSecret` | `string` | `undefined` | Client Secret (for Confidential Clients). |
-| `baseUrl` | `string` | `...staging-app...` | Authorization Server URL. |
-| `redirectUri` | `string` | **Required** | Callback URL after successful auth. |
-| `storage` | `string` | `memory` | Storage: `localStorage`, `sessionStorage`, `memory`. |
-| `autoRefresh` | `boolean` | `true` | Auto refresh token if available. |
+### Browser vs Node.js
+SDK ini menggunakan sistem **Conditional Exports**. Fitur integrasi (`/integration`) menggunakan modul Node.js `crypto` untuk tanda tangan HMAC. Dengan memisahkan impor, aplikasi frontend Anda tidak akan membengkak atau mengalami error karena dependensi Node.js.
 
-### Integration Client Options
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `clientId` | `string` | **Required** | Xepeng Dashboard Client ID. |
-| `clientSecret` | `string` | **Required** | Xepeng Dashboard Client Secret. |
-| `isProduction` | `boolean` | `false` | Use production environment. |
-| `baseUrl` | `string` | `...staging-api...` | Override base API URL. |
+| Modul | Penggunaan | Lingkungan |
+| :--- | :--- | :--- |
+| `xepeng-oauth-js` | OAuth & SSO | Browser (Vite, Webpack, dll) |
+| `xepeng-oauth-js/integration` | Payment & Orders | Node.js / Server-side |
+| `xepeng-oauth-js/react` | React Hook | Browser |
+| `xepeng-oauth-js/vue` | Vue Composable | Browser |
 
 ---
 
-## 🛡️ Security Note
-
-### Signature Mechanism
-For Payment Integration, every request is secured using **HMAC-SHA256**. The SDK handles this automatically using the format:
-`METHOD + PATH + TIMESTAMP + BODY`
-
-### PKCE State Mismatch
-Ensure you start and end the OAuth flow on the same domain and **port**. The SDK will throw a clear error if the PKCE state doesn't match.
-
 ## 📄 License
-
 MIT © Xepeng
